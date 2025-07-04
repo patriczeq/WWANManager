@@ -16,7 +16,7 @@ WWANManager is an alternative tool for managing WWAN (Mobile Broadband) connecti
 
 ## Requirements
 
-- **macOS** (older versions, where native WWAN support is insufficient or unavailable)
+- **macOS** (new versions, where native WWAN support is insufficient or unavailable)
 - **Fibocom L850GL modem** (other modems with similar interface and AT command sets may also work)
 - The modem must be unlocked and rebooted into USB ACM mode (see above)
 - `pppd` must be installed and accessible on your system
