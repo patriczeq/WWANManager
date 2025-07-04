@@ -42,6 +42,30 @@ WWANManager is an alternative tool for managing WWAN (Mobile Broadband) connecti
    - Verify that you have the necessary permissions to run `pppd` via `sudo`.
    - Use the app's logs to debug any connection issues.
 
+## Preview
+
+Here are some screenshots of the application in action:
+
+<p align="center">
+  <img src="preview/preview_app.png" alt="Main Application Window" width="600"/>
+</p>
+
+<p align="center">
+  <img src="preview/preview_aboutmodem.png" alt="About Modem Window" width="600"/>
+</p>
+
+<p align="center">
+  <img src="preview/preview_settings_interfaces.png" alt="Interfaces Settings" width="600"/>
+</p>
+
+<p align="center">
+  <img src="preview/preview_settings_network.png" alt="Network Settings" width="600"/>
+</p>
+
+<p align="center">
+  <img src="preview/preview_settings_personal.png" alt="Personal Settings" width="600"/>
+</p>
+
 ## Disclaimer
 
 - This tool is intended for advanced users comfortable with command-line operations and macOS system internals.
