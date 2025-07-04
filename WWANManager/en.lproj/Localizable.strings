@@ -1,0 +1,39 @@
+/* 
+  Localizable.strings
+  WWANManager
+
+  Created by Patrik Eder on 04.07.2025.
+  
+*/
+
+/**
+ @TAG: Main
+ */
+"Celluar data" = "Celluar data";
+"Operator" = "Operator";
+"About modem" = "About modem";
+"Settings" = "Settings";
+"Quit" = "Quit";
+"Signal" = "Signal";
+"Unknown" = "Unknown";
+"Connecting..." = "Connecting...";
+"Automatically" = "Automatically";
+"Searching..." = "Searching...";
+"Port does not exist!" = "Port does not exist!";
+"Bad password!" = "Bad password!";
+
+/**
+ Settings
+ */
+
+"Setup your connection" = "Setup your connection";
+"Interface" = "Interface";
+"Network" = "Network";
+"Personalization" = "Personalization";
+"Search" = "Search";
+"IP Ver." = "IP Ver.";
+"Show operator name in top bar" = "Show operator name in top bar";
+"You can save your password to avoid asking..." = "You can save your password to avoid asking...";
+"Save password" = "Save password";
+"Save" = "Save";
+

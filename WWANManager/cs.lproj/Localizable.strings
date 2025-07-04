@@ -1,0 +1,39 @@
+/*
+  Localizable.strings
+  WWANManager
+
+  Created by Patrik Eder on 04.07.2025.
+  
+*/
+
+/**
+ @TAG: Main
+ */
+"Celluar data" = "Mobilní data";
+"Operator" = "Operátor";
+"About modem" = "O modemu";
+"Settings" = "Nastavení";
+"Quit" = "Ukončit";
+"Signal" = "Signál";
+"Unknown" = "Neznámý";
+"Connecting..." = "Připojuji...";
+"Automatically" = "Automaticky";
+"Searching..." = "Hledám...";
+"Port does not exist!" = "Port neexistuje!";
+"Bad password!" = "Špatné heslo k účtu!";
+
+/**
+ Settings
+ */
+
+"Setup your connection" = "Nastavte své připojení";
+"Interface" = "Rozhraní";
+"Network" = "Síť";
+"Personalization" = "Personalizace";
+"Search" = "Hleadat";
+"IP Ver." = "Verze IP";
+"Show operator name in top bar" = "Zobrazit název operátora v horní liště";
+"You can save your password to avoid asking..." = "Můžete uložit své heslo sem, aby se aplikace pokaždé neptala";
+"Save password" = "Uložit heslo";
+"Save" = "Uložit";
+
