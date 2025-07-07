@@ -200,12 +200,12 @@ class StatusBarController {
     private func updateStatusIcon() {
         guard let button = statusItem.button else { return }
         let appearance = NSApp.effectiveAppearance
-        let dark = appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-        
+        let dark = (appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua && Settings.shared.iconColor == 0) || Settings.shared.iconColor == 1
+        var title = ""
         switch state {
         case .connected:
 
-            button.title = Settings.shared.showOperator ? (ModemManager.shared.operatorName ?? "") : ""
+            title = Settings.shared.showOperator ? (ModemManager.shared.operatorName ?? "") : ""
             
             if signalLevel == .poor {
                 button.image = NSImage(imageLiteralResourceName: dark ? "Signal1" : "Signal1_")
@@ -220,11 +220,11 @@ class StatusBarController {
             }
             
         case .disconnected:
-            button.title = ""
+            title = ""
             button.image = NSImage(imageLiteralResourceName: dark ? "Offline" : "Offline_")
             
         case .connecting:
-            button.title = NSLocalizedString("Connecting...", comment: "connecting")
+            title = NSLocalizedString("Connecting...", comment: "connecting")
             if iconAnimate == 0 {
                 button.image = NSImage(imageLiteralResourceName: dark ? "Connecting0" : "Connecting0_")
             }else if iconAnimate == 1 || iconAnimate == 5 {
@@ -240,5 +240,11 @@ class StatusBarController {
                 iconAnimate = 0
             }
         }
+        
+        let attributes: [NSAttributedString.Key: Any] = [
+            .foregroundColor: dark ? NSColor.white : NSColor.black // Replace with your desired color
+        ]
+        let attributedTitle = NSAttributedString(string: title, attributes: attributes)
+        button.attributedTitle = attributedTitle
     }
 }

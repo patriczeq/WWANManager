@@ -8,6 +8,7 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="AboutModemWindowController" customModule="WWANManager">
             <connections>
+                <outlet property="copyrightLabel" destination="uda-4E-ttd" id="lLs-AP-PxQ"/>
                 <outlet property="firmwareField" destination="HjN-7e-quu" id="Tks-iK-PWX"/>
                 <outlet property="imeiField" destination="h2J-Th-S5R" id="wzC-GT-wLQ"/>
                 <outlet property="modelField" destination="RRi-Is-HyQ" id="2xO-2n-5Vd"/>
@@ -17,6 +18,7 @@
                 <outlet property="serialField" destination="qU9-DP-h2W" id="n6I-np-QTM"/>
                 <outlet property="simNumberField" destination="iH2-gV-mFI" id="eMw-YU-QNo"/>
                 <outlet property="simStatusField" destination="owa-qA-JYH" id="TC0-XU-2lr"/>
+                <outlet property="versionLabel" destination="5UE-VZ-FSb" id="JlC-C8-SbH"/>
                 <outlet property="window" destination="IdB-TX-0nB" id="dRz-6o-8fn"/>
             </connections>
         </customObject>
@@ -26,7 +28,7 @@
             <windowStyleMask key="styleMask" titled="YES" closable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="196" y="206" width="336" height="372"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1920" height="1055"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1415"/>
             <view key="contentView" clipsToBounds="NO" autoresizesSubviews="NO" id="tj7-5G-mMb">
                 <rect key="frame" x="0.0" y="0.0" width="336" height="372"/>
                 <autoresizingMask key="autoresizingMask"/>
@@ -165,17 +167,17 @@
                         <rect key="frame" x="20" y="118" width="296" height="5"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     </box>
-                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="uda-4E-ttd">
-                        <rect key="frame" x="73" y="20" width="178" height="16"/>
+                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5UE-VZ-FSb">
+                        <rect key="frame" x="18" y="20" width="208" height="16"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" placeholderString="Copyright © 2025, pat" id="9wC-0x-Yku">
+                        <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="vers" placeholderString="vers" id="2Jl-gN-oIF">
                             <font key="font" metaFont="system"/>
-                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                            <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7uA-ZP-C3w">
-                        <rect key="frame" x="218" y="37" width="98" height="32"/>
+                        <rect key="frame" x="225" y="13" width="98" height="32"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="push" title="Refresh" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Eg1-Sx-pfm">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -200,6 +202,19 @@
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
+                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="uda-4E-ttd">
+                        <rect key="frame" x="18" y="37" width="208" height="16"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="Copyright" placeholderString="Copyright" id="9wC-0x-Yku">
+                            <font key="font" metaFont="system"/>
+                            <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
+                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                        </textFieldCell>
+                    </textField>
+                    <box verticalHuggingPriority="750" fixedFrame="YES" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="7Lh-i7-8Va">
+                        <rect key="frame" x="20" y="58" width="296" height="5"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    </box>
                 </subviews>
             </view>
             <point key="canvasLocation" x="-71" y="189"/>

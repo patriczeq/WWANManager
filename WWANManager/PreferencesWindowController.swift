@@ -29,9 +29,14 @@ class PreferencesWindowController: NSWindowController {
     @IBOutlet weak var labelTopOperator: NSTextField!
     @IBOutlet weak var labelSavePassword: NSTextField!
     @IBOutlet weak var labelSavePasswordHint: NSTextField!
+    @IBOutlet weak var labelIconColor: NSTextField!
+    @IBOutlet weak var iconColor: NSPopUpButton!
     
     // save
     @IBOutlet weak var labelSave: NSButton!
+    
+    @IBOutlet weak var copyrightLabel: NSTextField!
+    @IBOutlet weak var versionLabel: NSTextField!
     
     var LoadingOperators: Bool = false
     
@@ -61,9 +66,23 @@ class PreferencesWindowController: NSWindowController {
         labelIPVer.stringValue = NSLocalizedString("IP Ver.", comment: "IP version")
         // personal
         labelTopOperator.stringValue = NSLocalizedString("Show operator name in top bar", comment: "operator in menu bar")
-        labelSavePasswordHint.placeholderString = NSLocalizedString("You can save your password to avoid asking...", comment: "password hint")
+        labelIconColor.stringValue = NSLocalizedString("Icon color", comment: "icon color")
+        iconColor.removeAllItems()
+        iconColor.addItem(withTitle: NSLocalizedString("Automatically", comment: "automatically"))
+        iconColor.addItem(withTitle: NSLocalizedString("White", comment: "white"))
+        iconColor.addItem(withTitle: NSLocalizedString("Black", comment: "black"))
+        
+        
+        labelSavePasswordHint.stringValue = NSLocalizedString("You can save your password to avoid asking...", comment: "password hint")
         labelSavePassword.stringValue = NSLocalizedString("Save password", comment: "your account password")
         labelSave.title = NSLocalizedString("Save", comment: "Save settings")
+        
+        // Nastavení copyright a verze
+        let infoDict = Bundle.main.infoDictionary
+        
+        copyrightLabel.stringValue = infoDict?["NSHumanReadableCopyright"] as? String ?? ""
+        versionLabel.stringValue = "v\(infoDict?["CFBundleShortVersionString"] as? String ?? "Unknown")"
+        
         loadSettings()
     }
 
@@ -203,6 +222,19 @@ class PreferencesWindowController: NSWindowController {
             Settings.shared.operatorID      = selected.id
             Settings.shared.operatorNAME    = selected.name
             print("selected operator: \(selected.name) (\(selected.id))")
+        }
+    }
+    
+    @IBAction func changeIconColor(_ sender: NSPopUpButton) {
+        if let selected = sender.selectedItem?.title {
+            switch selected {
+            case NSLocalizedString("White", comment: "white"):
+                Settings.shared.iconColor = 1
+            case NSLocalizedString("Black", comment: "black"):
+                Settings.shared.iconColor = 2
+            default:
+                Settings.shared.iconColor = 0
+            }
         }
     }
     /*

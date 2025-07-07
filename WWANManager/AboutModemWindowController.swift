@@ -24,6 +24,9 @@ class AboutModemWindowController: NSWindowController {
     @IBOutlet weak var operatorField: NSTextField!
     @IBOutlet weak var refreshButton: NSButton!
     
+    @IBOutlet weak var copyrightLabel: NSTextField!
+    @IBOutlet weak var versionLabel: NSTextField!
+    
     func readModemField(for cmd: InfoATCommand) -> String{
         let _cmd = cmd.rawValue
         return ModemManager.shared.sendAndRead("AT+\(_cmd)")
@@ -77,6 +80,13 @@ class AboutModemWindowController: NSWindowController {
             window.center()                 // Doprostřed obrazovky
             window.makeKeyAndOrderFront(nil)
         }
+        
+        // Nastavení copyright a verze
+        let infoDict = Bundle.main.infoDictionary
+        let version = infoDict?["CFBundleShortVersionString"] as? String ?? "Unknown"
+        let copyright = infoDict?["NSHumanReadableCopyright"] as? String ?? ""
+        copyrightLabel.stringValue = copyright
+        versionLabel.stringValue = "v\(version)"
         
         refreshButton.action = #selector(loadModemInfo)
 

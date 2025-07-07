@@ -30,6 +30,9 @@
 "Interface" = "Interface";
 "Network" = "Network";
 "Personalization" = "Personalization";
+"Icon color" = "Icon color";
+"White" = "White";
+"Black" = "Black";
 "Search" = "Search";
 "IP Ver." = "IP Ver.";
 "Show operator name in top bar" = "Show operator name in top bar";

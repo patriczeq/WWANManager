@@ -30,6 +30,9 @@
 "Interface" = "Rozhraní";
 "Network" = "Síť";
 "Personalization" = "Personalizace";
+"Icon color" = "Barva ikony";
+"White" = "Bílá";
+"Black" = "Černá";
 "Search" = "Hleadat";
 "IP Ver." = "Verze IP";
 "Show operator name in top bar" = "Zobrazit název operátora v horní liště";

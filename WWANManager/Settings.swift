@@ -1,9 +1,19 @@
 import Foundation
 import Security
 
+enum ICO_COLOR: Int {
+    case color_auto = 0
+    case color_white = 1
+    case color_black = 2
+}
+
 class Settings {
     static let shared = Settings()
-
+    
+    var iconColor: Int {
+        get { UserDefaults.standard.integer(forKey: "iconColor") }
+        set { UserDefaults.standard.setValue(newValue, forKey: "iconColor") }
+    }
     var atPort: String {
         get { UserDefaults.standard.string(forKey: "atPort") ?? "/dev/cu.usbmodem14603" }
         set { UserDefaults.standard.setValue(newValue, forKey: "atPort") }
