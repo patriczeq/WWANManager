@@ -121,16 +121,16 @@ class PPPManager {
         
         // 1. Vytvoříme chat skript
         let script = """
-            ABORT "BUSY"
-            ABORT "NO CARRIER"
-            ABORT "ERROR"
-            '' ATZ
-            \(pin != "" ? "OK AT+CPIN=\"\(pin)\"" : "#NO PIN")
-            OK AT+COPS=\(COPS_STR)
-            OK AT+CGDCONT=1,"IP","\(apn)"
-            OK ATD*99#
-            CONNECT ''
-            """
+                    ABORT "BUSY"
+                    ABORT "NO CARRIER"
+                    ABORT "ERROR"
+                    '' ATZ
+                    \(pin != "" ? "OK AT+CPIN=\"\(pin)\"" : "#NO PIN")
+                    OK AT+COPS=\(COPS_STR)
+                    OK AT+CGDCONT=1,"IP","\(apn)"
+                    OK ATD*99#
+                    CONNECT ''
+                    """
         
         print(script)
         
