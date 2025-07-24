@@ -141,31 +141,46 @@ class PPPManager {
         
         // 2. Vytvoříme shell skript
         let shellScriptPath = "/tmp/run-pppd.sh"
-        let shellScript = """
-        #!/bin/bash
-        sudo /usr/sbin/pppd \(pppPort) \(baudrate) debug nodetach usepeerdns connect \"/usr/sbin/chat -v -f \(scriptPath)\"
-        """
+        let shellScript: String
+        if Settings.shared.passwd != "" {
+            shellScript = """
+            #!/bin/bash
+            echo \"\(Settings.shared.passwd)\" | sudo -S /usr/sbin/pppd \(pppPort) \(baudrate) debug nodetach usepeerdns connect \"/usr/sbin/chat -v -f \(scriptPath)\"
+            """
+        } else {
+            shellScript = """
+            #!/bin/bash
+            sudo /usr/sbin/pppd \(pppPort) \(baudrate) debug nodetach usepeerdns connect \"/usr/sbin/chat -v -f \(scriptPath)\"
+            """
+        }
         try? shellScript.write(toFile: shellScriptPath, atomically: true, encoding: .utf8)
         try? FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: shellScriptPath)
 
-        // 3. AppleScript pro spuštění s heslem
-        let appleScript = Settings.shared.passwd != "" ? """
-        do shell script "\(shellScriptPath)" user name "\(NSUserName())" password "\(Settings.shared.passwd)"  with administrator privileges
-        """ : """
-        do shell script "\(shellScriptPath)" with administrator privileges
-        """
-        
-
-        // 4. Spuštění přes osascript
+        // 3. Spuštění shell skriptu přímo přes Process (bez osascript)
         task = Process()
-        task?.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
-        task?.arguments = ["-e", appleScript]
-
+        task?.executableURL = URL(fileURLWithPath: "/bin/bash")
+        task?.arguments = [shellScriptPath]
+        let outputPipe = Pipe()
+        let errorPipe = Pipe()
+        task?.standardOutput = outputPipe
+        task?.standardError = errorPipe
         do {
             try task?.run()
-            print("Running with sudo")
+            print("Running pppd script directly via bash")
         } catch {
             print("error running pppd: \(error)")
+        }
+        outputPipe.fileHandleForReading.readabilityHandler = { handle in
+            let data = handle.availableData
+            if let str = String(data: data, encoding: .utf8), !str.isEmpty {
+                print("pppd stdout: \(str)")
+            }
+        }
+        errorPipe.fileHandleForReading.readabilityHandler = { handle in
+            let data = handle.availableData
+            if let str = String(data: data, encoding: .utf8), !str.isEmpty {
+                print("pppd stderr: \(str)")
+            }
         }
         
         ModemManager.shared.updateOperatorName()
