@@ -142,10 +142,31 @@ class PPPManager {
         // 2. Vytvoříme shell skript
         let shellScriptPath = "/tmp/run-pppd.sh"
         let shellScript: String
-        if Settings.shared.passwd != "" {
+        var password = Settings.shared.passwd
+        
+        // Pokud není heslo, zobrazíme dialog pro zadání hesla
+        if password.isEmpty {
+            let alert = NSAlert()
+            alert.messageText = NSLocalizedString("Enter password for sudo", comment: "sudo password prompt")
+            alert.informativeText = NSLocalizedString("Enter password for sudo to use this feature.", comment: "sudo password info")
+            alert.alertStyle = .informational
+            alert.addButton(withTitle: "OK")
+            
+            let inputField = NSSecureTextField(frame: NSRect(x: 0, y: 0, width: 200, height: 24))
+            alert.accessoryView = inputField
+            let response = alert.runModal()
+            if response == .alertFirstButtonReturn {
+                password = inputField.stringValue
+                Settings.shared.passwd = password // volitelně uložit pro další použití
+            } else {
+                return false
+            }
+        }
+        
+        if !password.isEmpty {
             shellScript = """
             #!/bin/bash
-            echo \"\(Settings.shared.passwd)\" | sudo -S /usr/sbin/pppd \(pppPort) \(baudrate) debug nodetach usepeerdns connect \"/usr/sbin/chat -v -f \(scriptPath)\"
+            echo \"\(password)\" | sudo -S /usr/sbin/pppd \(pppPort) \(baudrate) debug nodetach usepeerdns connect \"/usr/sbin/chat -v -f \(scriptPath)\"
             """
         } else {
             shellScript = """

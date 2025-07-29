@@ -1,4 +1,4 @@
-/* 
+/*
   Localizable.strings
   WWANManager
 
@@ -20,6 +20,8 @@
 "Automatically" = "Automatically";
 "Searching..." = "Searching...";
 "Port does not exist!" = "Port does not exist!";
+"Enter password for sudo" = "Enter password for sudo";
+"Enter password for sudo to use this feature." = "Enter password for sudo to use this feature.";
 "Bad password!" = "Bad password!";
 
 /**

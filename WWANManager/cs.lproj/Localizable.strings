@@ -20,6 +20,8 @@
 "Automatically" = "Automaticky";
 "Searching..." = "Hledám...";
 "Port does not exist!" = "Port neexistuje!";
+"Enter password for sudo" = "Zadejte heslo pro sudo";
+"Enter password for sudo to use this feature." = "Zadejte heslo pro sudo, abyste mohli použít tuto funkci.";
 "Bad password!" = "Špatné heslo k účtu!";
 
 /**
