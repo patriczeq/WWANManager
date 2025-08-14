@@ -13,7 +13,12 @@ class PreferencesWindowController: NSWindowController {
     @IBOutlet weak var baudField: NSTextField!
     @IBOutlet weak var passwdField: NSTextField!
     @IBOutlet weak var operatorPopup: NSPopUpButton!
+    
     @IBOutlet weak var ipVerPopup: NSPopUpButton!
+    @IBOutlet weak var customDNS: NSSwitch!
+    @IBOutlet weak var primaryDNSField: NSTextField!
+    @IBOutlet weak var secondaryDNSField: NSTextField!
+    
     @IBOutlet weak var showOp: NSSwitch!
     
     // labels
@@ -59,7 +64,8 @@ class PreferencesWindowController: NSWindowController {
         // tabs
         labelTabs.tabViewItems[0].label = NSLocalizedString("Interface", comment: "interface view")
         labelTabs.tabViewItems[1].label = NSLocalizedString("Network", comment: "network view")
-        labelTabs.tabViewItems[2].label = NSLocalizedString("Personalization", comment: "pers view")
+        labelTabs.tabViewItems[2].label = NSLocalizedString("IP Conf", comment: "ip view")
+        labelTabs.tabViewItems[3].label = NSLocalizedString("Personalization", comment: "pers view")
         // operator
         labelOperator.stringValue = NSLocalizedString("Operator", comment: "Operator selection")
         labelSearch.title = NSLocalizedString("Search", comment: "Search operators")
@@ -112,6 +118,7 @@ class PreferencesWindowController: NSWindowController {
         
         showOp.state = Settings.shared.showOperator ? .on : .off
         
+        
         availableOperators.removeAll()
         if Settings.shared.operatorID != "0" {
             availableOperators.append((NSLocalizedString("Automatically", comment: "auto"), "0"))
@@ -125,6 +132,9 @@ class PreferencesWindowController: NSWindowController {
         operatorPopup.selectItem(withTitle: Settings.shared.operatorNAME)
         
         ipVerPopup.selectItem(withTitle: Settings.shared.IPver)
+        customDNS.state = Settings.shared.CustomDNS ? .on : .off
+        primaryDNSField.stringValue = Settings.shared.PrimaryDNS
+        secondaryDNSField.stringValue = Settings.shared.SecondaryDNS
     }
     
     @IBAction func ipChanged(_ sender: NSPopUpButton) {
@@ -152,7 +162,10 @@ class PreferencesWindowController: NSWindowController {
         Settings.shared.pin = pinField.stringValue
         Settings.shared.baudrate = baudField.stringValue
         Settings.shared.passwd = passwdField.stringValue
-        //Settings.shared.IPver = ipVerPopup.stringValue
+        Settings.shared.IPver = ipVerPopup.selectedItem?.title ?? "IP"
+        Settings.shared.CustomDNS = customDNS.state == .on
+        Settings.shared.PrimaryDNS = primaryDNSField.stringValue
+        Settings.shared.SecondaryDNS = secondaryDNSField.stringValue
         self.window?.close()
     }
     

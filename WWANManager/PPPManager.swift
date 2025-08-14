@@ -15,7 +15,9 @@ class PPPManager {
 
     private var task: Process?
     private var chatScriptPath: String?
-   
+    private var connectionStartTime: Date?
+    private var connectionTimer: Timer?
+
     func isPPPConnected() -> Bool {
             var ifaddrPtr: UnsafeMutablePointer<ifaddrs>?
 
@@ -69,6 +71,7 @@ class PPPManager {
         let baudrate = Settings.shared.baudrate
         let pin      = Settings.shared.pin
         let ipver    = Settings.shared.IPver
+        let peerDNS  = !Settings.shared.CustomDNS
         
         // Ověření portů
         if !ModemManager.shared.checkConnection() {
@@ -112,6 +115,19 @@ class PPPManager {
             
             return false*/
         }
+        
+        // Kontrola dostupných PDP kontextů
+        print("Checking available PDP contexts...")
+        let cgdcontTest = ModemManager.shared.sendAndRead("AT+CGDCONT=?")
+        print("AT+CGDCONT=? response: \(cgdcontTest)")
+        
+        let cgdcontCurrent = ModemManager.shared.sendAndRead("AT+CGDCONT?")
+        print("AT+CGDCONT? current contexts: \(cgdcontCurrent)")
+        
+        // Kontrola IPv6 podpory
+        let cgcontrdpTest = ModemManager.shared.sendAndRead("AT+CGCONTRDP=?")
+        print("AT+CGCONTRDP=? response: \(cgcontrdpTest)")
+        
         var COPS_STR = ""
         if Settings.shared.operatorID == "0" {
             COPS_STR = "0"
@@ -119,20 +135,59 @@ class PPPManager {
             COPS_STR = "1,2,\"\(Settings.shared.operatorID)\""
         }
         
+        // Určení správného PDP typu podle nastavení
+        var pdpType: String
+        switch ipver {
+        case "IP":
+            pdpType = "IP"
+        case "IPV6":
+            pdpType = "IPV6"
+        case "IPV4V6":
+            pdpType = "IPV4V6"
+        default:
+            pdpType = "IP" // výchozí fallback
+        }
+        
+        // Experimentální: nastavení více kontextů pro lepší IPv6 podporu
+        if ipver == "IPV4V6" {
+            // Zkusíme nastavit separátní kontexty pro IPv4 a IPv6
+            let clearContexts = ModemManager.shared.sendAndRead("AT+CGDCONT=0")
+            print("Clearing contexts: \(clearContexts)")
+            
+            let setIPv4Context = ModemManager.shared.sendAndRead("AT+CGDCONT=1,\"IP\",\"\(apn)\"")
+            print("Setting IPv4 context: \(setIPv4Context)")
+            
+            let setIPv6Context = ModemManager.shared.sendAndRead("AT+CGDCONT=2,\"IPV6\",\"\(apn)\"")
+            print("Setting IPv6 context: \(setIPv6Context)")
+            
+            // Zkontrolujeme nastavené kontexty
+            let verifyContexts = ModemManager.shared.sendAndRead("AT+CGDCONT?")
+            print("Verified contexts: \(verifyContexts)")
+        }
+        
         // 1. Vytvoříme chat skript
-        let script = """
+        var script = """
                     ABORT "BUSY"
                     ABORT "NO CARRIER"
                     ABORT "ERROR"
                     '' ATZ
-                    \(pin != "" ? "OK AT+CPIN=\"\(pin)\"" : "#NO PIN")
-                    OK AT+COPS=\(COPS_STR)
-                    OK AT+CGDCONT=1,"IP","\(apn)"
-                    OK ATD*99#
-                    CONNECT ''
                     """
-        
+        if pin != "" {
+            script += """
+                    \nOK AT+CPIN=\"\(pin)\"
+                    """
+        }
+        script += """
+                \nOK AT+COPS=\(COPS_STR)
+                OK AT+CGDCONT=1,"\(pdpType)","\(apn)"
+                OK ATD*99#
+                CONNECT ''
+                """
+        print("\nChat script:")
+        print("------------------------------")
         print(script)
+        print("------------------------------")
+        print("EOF chat script\n")
         
         let scriptPath = "/tmp/chat-connect-wwan"
         try? script.write(toFile: scriptPath, atomically: true, encoding: .utf8)
@@ -141,7 +196,7 @@ class PPPManager {
         
         // 2. Vytvoříme shell skript
         let shellScriptPath = "/tmp/run-pppd.sh"
-        let shellScript: String
+        var shellScript: String
         var password = Settings.shared.passwd
         
         // Pokud není heslo, zobrazíme dialog pro zadání hesla
@@ -162,18 +217,51 @@ class PPPManager {
                 return false
             }
         }
-        
+        shellScript = "#!/bin/bash\n"
         if !password.isEmpty {
-            shellScript = """
-            #!/bin/bash
-            echo \"\(password)\" | sudo -S /usr/sbin/pppd \(pppPort) \(baudrate) debug nodetach usepeerdns connect \"/usr/sbin/chat -v -f \(scriptPath)\"
-            """
+            shellScript += "echo \"\(password)\" | sudo -S "
         } else {
-            shellScript = """
-            #!/bin/bash
-            sudo /usr/sbin/pppd \(pppPort) \(baudrate) debug nodetach usepeerdns connect \"/usr/sbin/chat -v -f \(scriptPath)\"
-            """
+            shellScript += "sudo "
         }
+        shellScript += "/usr/sbin/pppd \(pppPort) \(baudrate) debug nodetach"
+        if peerDNS || !peerDNS {
+            shellScript += " usepeerdns"
+        } else {
+            // Přidání custom DNS serverů - jen nové pppd verze
+            let primaryDNS = Settings.shared.PrimaryDNS.trimmingCharacters(in: .whitespacesAndNewlines)
+            let secondaryDNS = Settings.shared.SecondaryDNS.trimmingCharacters(in: .whitespacesAndNewlines)
+            
+            if !primaryDNS.isEmpty {
+                shellScript += " ms-dns1 \(primaryDNS)"
+                print("Using custom primary DNS: \(primaryDNS)")
+            }
+            
+            if !secondaryDNS.isEmpty {
+                shellScript += " ms-dns3 \(secondaryDNS)"
+                print("Using custom secondary DNS: \(secondaryDNS)")
+            }
+            
+            // Pokud nejsou nastavené žádné DNS servery, použijeme výchozí
+            if primaryDNS.isEmpty && secondaryDNS.isEmpty {
+                shellScript += " ms-dns1 8.8.8.8 ms-dns3 8.8.4.4"
+                print("No custom DNS set, using Google DNS as fallback")
+            }
+        }
+        // Přidání IP verze
+        if ipver == "IP" {
+            // IPv4 pouze - žádné další parametry nejsou potřeba (výchozí)
+        } else if ipver == "IPV6" {
+            shellScript += " ipv6 ::1,::2"
+        } else if ipver == "IPV4V6" {
+            shellScript += " ipv6 ::1,::2"
+        }
+        shellScript += " connect \"/usr/sbin/chat -v -f \(scriptPath)\""
+        
+        print("Shell script:")
+        print("------------------------------")
+        print(shellScript)
+        print("------------------------------")
+        
         try? shellScript.write(toFile: shellScriptPath, atomically: true, encoding: .utf8)
         try? FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: shellScriptPath)
 
@@ -188,6 +276,11 @@ class PPPManager {
         do {
             try task?.run()
             print("Running pppd script directly via bash")
+            
+            // Spustit timeout monitoring
+            connectionStartTime = Date()
+            startConnectionMonitoring()
+            
         } catch {
             print("error running pppd: \(error)")
         }
@@ -195,6 +288,13 @@ class PPPManager {
             let data = handle.availableData
             if let str = String(data: data, encoding: .utf8), !str.isEmpty {
                 print("pppd stdout: \(str)")
+                
+                // Pokud se úspěšně připojíme a máme IPv6, zkusíme získat globální IPv6 adresu
+                if str.contains("local  LL address") && ipver != "IP" {
+                    DispatchQueue.global().asyncAfter(deadline: .now() + 2) {
+                        self.configureIPv6Interface()
+                    }
+                }
             }
         }
         errorPipe.fileHandleForReading.readabilityHandler = { handle in
@@ -221,6 +321,161 @@ class PPPManager {
 
         if let scriptPath = chatScriptPath {
             try? FileManager.default.removeItem(atPath: scriptPath)
+        }
+    }
+    
+    private func checkIPv6Connectivity() -> (hasIPv4: Bool, hasPublicIPv6: Bool) {
+        var hasIPv4 = false
+        var hasPublicIPv6 = false
+        
+        var ifaddrPtr: UnsafeMutablePointer<ifaddrs>?
+        guard getifaddrs(&ifaddrPtr) == 0, let firstAddr = ifaddrPtr else {
+            return (false, false)
+        }
+        defer { freeifaddrs(ifaddrPtr) }
+        
+        var ptr: UnsafeMutablePointer<ifaddrs>? = firstAddr
+        while let interface = ptr?.pointee {
+            let name = String(cString: interface.ifa_name)
+            
+            if name == "ppp0" {
+                if interface.ifa_addr.pointee.sa_family == UInt8(AF_INET) {
+                    hasIPv4 = true
+                } else if interface.ifa_addr.pointee.sa_family == UInt8(AF_INET6) {
+                    var addr = interface.ifa_addr.pointee
+                    var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
+                    
+                    getnameinfo(&addr, socklen_t(interface.ifa_addr.pointee.sa_len),
+                                &hostname, socklen_t(hostname.count),
+                                nil, 0, NI_NUMERICHOST)
+                    
+                    let ipv6 = String(cString: hostname)
+                    // Kontrola zda není link-local (fe80::)
+                    if !ipv6.hasPrefix("fe80:") && ipv6 != "::1" {
+                        hasPublicIPv6 = true
+                    }
+                }
+            }
+            ptr = interface.ifa_next
+        }
+        
+        return (hasIPv4, hasPublicIPv6)
+    }
+    
+    private func configureIPv6Interface() {
+        print("🔧 Attempting to configure IPv6 for ppp0...")
+        
+        // Nejdříve zkusíme aktivovat IPv6 na interface
+        let enableIPv6Script = """
+        #!/bin/bash
+        echo "\(Settings.shared.passwd)" | sudo -S sysctl -w net.inet6.ip6.forwarding=1
+        echo "\(Settings.shared.passwd)" | sudo -S sysctl -w net.inet6.ip6.accept_rtadv=1
+        echo "\(Settings.shared.passwd)" | sudo -S ifconfig ppp0 inet6 -ifdisabled
+        echo "\(Settings.shared.passwd)" | sudo -S ifconfig ppp0 inet6 auto_linklocal
+        
+        # Zkusíme získat Router Advertisement
+        echo "\(Settings.shared.passwd)" | sudo -S rtsol ppp0 2>/dev/null || true
+        
+        # Počkáme na konfigurace
+        sleep 3
+        
+        # Zobrazíme výsledek
+        ifconfig ppp0 | grep inet6
+        """
+        
+        let scriptPath = "/tmp/configure-ipv6.sh"
+        try? enableIPv6Script.write(toFile: scriptPath, atomically: true, encoding: .utf8)
+        try? FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: scriptPath)
+        
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/bin/bash")
+        task.arguments = [scriptPath]
+        
+        let pipe = Pipe()
+        task.standardOutput = pipe
+        task.standardError = pipe
+        
+        do {
+            try task.run()
+            task.waitUntilExit()
+            
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            if let output = String(data: data, encoding: .utf8) {
+                print("IPv6 configuration result:")
+                print(output)
+            }
+            
+            // Kontrola zda máme nyní globální IPv6
+            DispatchQueue.global().asyncAfter(deadline: .now() + 2) {
+                let result = self.checkIPv6Connectivity()
+                if result.hasPublicIPv6 {
+                    print("✅ IPv6 successfully configured!")
+                } else {
+                    print("⚠️  IPv6 configuration failed - provider may not support IPv6")
+                    print("💡 Try switching to Windows mode or contact Vodafone support")
+                }
+            }
+            
+        } catch {
+            print("Error configuring IPv6: \(error)")
+        }
+        
+        // Vyčistíme dočasný skript
+        try? FileManager.default.removeItem(atPath: scriptPath)
+    }
+    
+    private func startConnectionMonitoring() {
+        connectionTimer?.invalidate() // Zrušit předchozí timer, pokud existuje
+        
+        connectionTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { timer in
+            guard let startTime = self.connectionStartTime else {
+                timer.invalidate()
+                return
+            }
+            
+            let elapsed = Date().timeIntervalSince(startTime)
+            
+            // KLÍČOVÁ OPRAVA: Pokud jsme se úspěšně připojili, zrušíme monitoring
+            if self.isPPPConnected() {
+                print("✅ Successfully connected! Stopping timeout monitoring.")
+                self.connectionStartTime = nil
+                timer.invalidate()
+                return
+            }
+            
+            print("Connection attempt in progress... Elapsed time: \(elapsed) seconds")
+            
+            // Pokud připojení trvá déle než 60 sekund A STÁLE NEJSME PŘIPOJENI, ukončíme proces
+            if elapsed > 60 {
+                print("🔴 Connection attempt timed out after 60 seconds. Terminating application...")
+                
+                // Force terminate pppd proces
+                self.task?.terminate()
+                self.task?.interrupt()
+                
+                // Reset modemu
+                ModemManager.shared.open()
+                ModemManager.shared.send(command: "AT+CFUN=1,1")
+                ModemManager.shared.close()
+                
+                // Zobrazit alert uživateli
+                DispatchQueue.main.async {
+                    let alert = NSAlert()
+                    alert.messageText = NSLocalizedString("Connection Timeout - Application will exit", comment: "connection timeout fatal error")
+                    alert.informativeText = NSLocalizedString("Failed to establish connection after 60 seconds. The application will be terminated to prevent hanging processes.", comment: "connection timeout fatal info")
+                    alert.alertStyle = .critical
+                    alert.addButton(withTitle: "Exit Application")
+                    alert.runModal()
+                    
+                    // UKONČIT CELOU APLIKACI
+                    print("🔴 TERMINATING APPLICATION DUE TO CONNECTION TIMEOUT")
+                    NSApplication.shared.terminate(nil)
+                }
+                
+                // Resetovat stav
+                self.connectionStartTime = nil
+                timer.invalidate()
+            }
         }
     }
 }

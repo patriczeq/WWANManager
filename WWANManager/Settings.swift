@@ -59,6 +59,21 @@ class Settings {
         set { UserDefaults.standard.setValue(newValue, forKey: "IPver") }
     }
     
+    var CustomDNS: Bool {
+        get { UserDefaults.standard.bool(forKey: "CustomDNS") }
+        set { UserDefaults.standard.setValue(newValue, forKey: "CustomDNS") }
+    }
+    
+    var PrimaryDNS: String {
+        get { UserDefaults.standard.string(forKey: "PrimaryDNS") ?? "" }
+        set { UserDefaults.standard.setValue(newValue, forKey: "PrimaryDNS") }
+    }
+    
+    var SecondaryDNS: String {
+        get { UserDefaults.standard.string(forKey: "SecondaryDNS") ?? "" }
+        set { UserDefaults.standard.setValue(newValue, forKey: "SecondaryDNS") }
+    }
+    
     var showOperator: Bool {
         get { UserDefaults.standard.bool(forKey: "showOperator") }
         set { UserDefaults.standard.setValue(newValue, forKey: "showOperator") }
