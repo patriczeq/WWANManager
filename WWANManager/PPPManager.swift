@@ -18,6 +18,16 @@ class PPPManager {
     private var connectionStartTime: Date?
     private var connectionTimer: Timer?
 
+    // Statistiky připojení
+    private var totalBytesReceived: UInt64 = 0
+    private var totalBytesSent: UInt64 = 0
+    private var lastBytesIn: UInt64 = 0
+    private var lastBytesOut: UInt64 = 0
+    private var lastUpdateTime: Date?
+    private var currentSpeedIn: Double = 0.0
+    private var currentSpeedOut: Double = 0.0
+    private var connectionDuration: TimeInterval = 0
+
     func isPPPConnected() -> Bool {
             var ifaddrPtr: UnsafeMutablePointer<ifaddrs>?
 
@@ -224,26 +234,26 @@ class PPPManager {
             shellScript += "sudo "
         }
         shellScript += "/usr/sbin/pppd \(pppPort) \(baudrate) debug nodetach"
-        if peerDNS || !peerDNS {
+        if peerDNS {
             shellScript += " usepeerdns"
         } else {
-            // Přidání custom DNS serverů - jen nové pppd verze
+            // Přidání custom DNS serverů - podle man pppd
             let primaryDNS = Settings.shared.PrimaryDNS.trimmingCharacters(in: .whitespacesAndNewlines)
             let secondaryDNS = Settings.shared.SecondaryDNS.trimmingCharacters(in: .whitespacesAndNewlines)
             
             if !primaryDNS.isEmpty {
-                shellScript += " ms-dns1 \(primaryDNS)"
+                shellScript += " ms-dns \(primaryDNS)"
                 print("Using custom primary DNS: \(primaryDNS)")
             }
             
             if !secondaryDNS.isEmpty {
-                shellScript += " ms-dns3 \(secondaryDNS)"
+                shellScript += " ms-dns \(secondaryDNS)"
                 print("Using custom secondary DNS: \(secondaryDNS)")
             }
             
             // Pokud nejsou nastavené žádné DNS servery, použijeme výchozí
             if primaryDNS.isEmpty && secondaryDNS.isEmpty {
-                shellScript += " ms-dns1 8.8.8.8 ms-dns3 8.8.4.4"
+                shellScript += " ms-dns 8.8.8.8 ms-dns 8.8.4.4"
                 print("No custom DNS set, using Google DNS as fallback")
             }
         }
@@ -439,6 +449,8 @@ class PPPManager {
             if self.isPPPConnected() {
                 print("✅ Successfully connected! Stopping timeout monitoring.")
                 self.connectionStartTime = nil
+                self.resetStatistics()
+                self.startStatisticsMonitoring()
                 timer.invalidate()
                 return
             }
@@ -477,5 +489,135 @@ class PPPManager {
                 timer.invalidate()
             }
         }
+    }
+    
+    // MARK: - Statistiky připojení
+    
+    private func resetStatistics() {
+        totalBytesReceived = 0
+        totalBytesSent = 0
+        lastBytesIn = 0
+        lastBytesOut = 0
+        lastUpdateTime = Date()
+        currentSpeedIn = 0.0
+        currentSpeedOut = 0.0
+        connectionStartTime = Date()
+    }
+    
+    private func startStatisticsMonitoring() {
+        connectionTimer?.invalidate()
+        
+        connectionTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+            if self.isPPPConnected() {
+                self.updateStatistics()
+            } else {
+                // Připojení bylo ztraceno
+                timer.invalidate()
+                self.connectionTimer = nil
+                self.connectionStartTime = nil
+            }
+        }
+    }
+    
+    private func updateStatistics() {
+        guard let (bytesIn, bytesOut) = getNetworkInterfaceStatistics(interface: "ppp0") else {
+            return
+        }
+        
+        let currentTime = Date()
+        
+        if lastUpdateTime != nil {
+            let timeDiff = currentTime.timeIntervalSince(lastUpdateTime!)
+            
+            if timeDiff > 0 {
+                // Vypočítat rychlost
+                let bytesDiffIn = bytesIn > lastBytesIn ? bytesIn - lastBytesIn : 0
+                let bytesDiffOut = bytesOut > lastBytesOut ? bytesOut - lastBytesOut : 0
+                
+                currentSpeedIn = Double(bytesDiffIn) / timeDiff
+                currentSpeedOut = Double(bytesDiffOut) / timeDiff
+                
+                // Aktualizovat celkové statistiky
+                totalBytesReceived = bytesIn
+                totalBytesSent = bytesOut
+            }
+        }
+        
+        lastBytesIn = bytesIn
+        lastBytesOut = bytesOut
+        lastUpdateTime = currentTime
+        
+        // Aktualizovat dobu připojení
+        if let startTime = connectionStartTime {
+            connectionDuration = currentTime.timeIntervalSince(startTime)
+        }
+    }
+    
+    private func getNetworkInterfaceStatistics(interface: String) -> (bytesIn: UInt64, bytesOut: UInt64)? {
+        var ifaddrPtr: UnsafeMutablePointer<ifaddrs>?
+        
+        guard getifaddrs(&ifaddrPtr) == 0, let firstAddr = ifaddrPtr else {
+            return nil
+        }
+        
+        defer {
+            freeifaddrs(ifaddrPtr)
+        }
+        
+        var ptr: UnsafeMutablePointer<ifaddrs>? = firstAddr
+        while let ifaddr = ptr?.pointee {
+            let name = String(cString: ifaddr.ifa_name)
+            
+            if name == interface && ifaddr.ifa_addr.pointee.sa_family == UInt8(AF_LINK) {
+                let data = ifaddr.ifa_data?.assumingMemoryBound(to: if_data.self).pointee
+                if let data = data {
+                    return (bytesIn: UInt64(data.ifi_ibytes), bytesOut: UInt64(data.ifi_obytes))
+                }
+            }
+            
+            ptr = ifaddr.ifa_next
+        }
+        
+        return nil
+    }
+    
+    // MARK: - Veřejné metody pro získání statistik
+    
+    func getCurrentSpeed() -> (downloadKbps: Double, uploadKbps: Double) {
+        return (currentSpeedIn * 8 / 1024, currentSpeedOut * 8 / 1024) // převod na Kbps
+    }
+    
+    func getFormattedDataUsage() -> String {
+        let formatter = ByteCountFormatter()
+        formatter.countStyle = .binary
+        
+        let received = formatter.string(fromByteCount: Int64(totalBytesReceived))
+        let sent = formatter.string(fromByteCount: Int64(totalBytesSent))
+        
+        return "↓ \(received) ↑ \(sent)"
+    }
+    
+    func getFormattedSpeed() -> String {
+        let (download, upload) = getCurrentSpeed()
+        
+        func formatSpeed(_ speed: Double) -> String {
+            if speed > 1024 {
+                return String(format: "%.1f Mbps", speed / 1024)
+            } else {
+                return String(format: "%.0f Kbps", speed)
+            }
+        }
+        
+        return "↓ \(formatSpeed(download)) ↑ \(formatSpeed(upload))"
+    }
+    
+    func getFormattedConnectionTime() -> String {
+        guard connectionDuration > 0 else { return "00:00:00" }
+        
+        let hours = Int(connectionDuration) / 3600
+        let minutes = (Int(connectionDuration) % 3600) / 60
+        let seconds = Int(connectionDuration) % 60
+        
+        return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
     }
 }

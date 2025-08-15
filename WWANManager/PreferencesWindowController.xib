@@ -33,6 +33,8 @@
                 <outlet property="primaryDNSField" destination="bh1-hb-fiw" id="3Py-N1-tkE"/>
                 <outlet property="secondaryDNSField" destination="wXj-e5-Xsj" id="vYi-1L-pct"/>
                 <outlet property="showOp" destination="4gA-WZ-1nR" id="Rjx-Nl-7Ks"/>
+                <outlet property="testATPortButton" destination="oaB-Ha-MQy" id="gjA-mo-lpF"/>
+                <outlet property="testPPPPortButton" destination="26a-fm-d4B" id="XKf-a4-7RX"/>
                 <outlet property="versionLabel" destination="fC6-oG-viY" id="2D1-Hx-Jjv"/>
                 <outlet property="window" destination="kAo-sF-jrB" id="ZOr-u7-SoP"/>
             </connections>
@@ -111,7 +113,7 @@
                                             </textFieldCell>
                                         </textField>
                                         <comboBox focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="LKY-Xj-xjp">
-                                            <rect key="frame" x="84" y="152" width="348" height="23"/>
+                                            <rect key="frame" x="84" y="152" width="189" height="23"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <comboBoxCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="center" placeholderString="bauds" bezelStyle="round" buttonBordered="NO" numberOfVisibleItems="5" id="Ztj-g9-3e0">
                                                 <font key="font" metaFont="system"/>
@@ -136,7 +138,7 @@
                                             </textFieldCell>
                                         </textField>
                                         <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ZTd-p8-EEo">
-                                            <rect key="frame" x="82" y="206" width="351" height="25"/>
+                                            <rect key="frame" x="82" y="206" width="192" height="25"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <popUpButtonCell key="cell" type="roundTextured" bezelStyle="texturedRounded" alignment="center" lineBreakMode="truncatingTail" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="V9P-Gk-Exk">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -148,7 +150,7 @@
                                             </connections>
                                         </popUpButton>
                                         <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8h3-VJ-OFN">
-                                            <rect key="frame" x="82" y="178" width="351" height="25"/>
+                                            <rect key="frame" x="82" y="178" width="192" height="25"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <popUpButtonCell key="cell" type="roundTextured" bezelStyle="texturedRounded" alignment="center" lineBreakMode="truncatingTail" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="sZg-zf-0sF">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -159,6 +161,28 @@
                                                 <action selector="pppPortChanged:" target="-2" id="ptZ-ft-hJA"/>
                                             </connections>
                                         </popUpButton>
+                                        <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oaB-Ha-MQy">
+                                            <rect key="frame" x="271" y="203" width="107" height="32"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <buttonCell key="cell" type="push" title="Test" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Pbo-re-ivr">
+                                                <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                            <connections>
+                                                <action selector="testATPort:" target="-2" id="4bj-fw-dd7"/>
+                                            </connections>
+                                        </button>
+                                        <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="26a-fm-d4B">
+                                            <rect key="frame" x="271" y="175" width="107" height="32"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <buttonCell key="cell" type="push" title="Test" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="dfk-C1-GOT">
+                                                <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                            <connections>
+                                                <action selector="testPPPPort:" target="-2" id="Cvs-uw-508"/>
+                                            </connections>
+                                        </button>
                                     </subviews>
                                 </view>
                             </tabViewItem>
@@ -312,7 +336,7 @@
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <popUpButtonCell key="cell" type="roundTextured" title="IP" bezelStyle="texturedRounded" alignment="center" lineBreakMode="truncatingTail" state="on" borderStyle="border" inset="2" selectedItem="QTg-wH-pac" id="E8i-9n-9ih">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                                <font key="font" metaFont="system"/>
+                                                <font key="font" metaFont="message"/>
                                                 <menu key="menu" id="e8C-ck-N3P">
                                                     <items>
                                                         <menuItem title="IP" state="on" id="QTg-wH-pac"/>

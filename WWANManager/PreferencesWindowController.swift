@@ -8,6 +8,8 @@ class PreferencesWindowController: NSWindowController {
     
     @IBOutlet weak var atPortPopup: NSPopUpButton!
     @IBOutlet weak var pppPortPopup: NSPopUpButton!
+    @IBOutlet weak var testATPortButton: NSButton!
+    @IBOutlet weak var testPPPPortButton: NSButton!
     @IBOutlet weak var apnField: NSTextField!
     @IBOutlet weak var pinField: NSTextField!
     @IBOutlet weak var baudField: NSTextField!
@@ -248,6 +250,68 @@ class PreferencesWindowController: NSWindowController {
             default:
                 Settings.shared.iconColor = 0
             }
+        }
+    }
+    
+    @IBAction func testATPort(_ sender: NSButton) {
+        guard let selectedPort = atPortPopup.selectedItem?.title else {
+            showPortTestAlert(title: "Chyba", message: "Není vybrán žádný AT port")
+            return
+        }
+        
+        sender.title = "Testování..."
+        sender.isEnabled = false
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            let result = Settings.shared.testATPort(selectedPort)
+            
+            DispatchQueue.main.async {
+                sender.title = "Test AT"
+                sender.isEnabled = true
+                
+                let alertType: NSAlert.Style = result.success ? .informational : .warning
+                self.showPortTestAlert(title: result.success ? "Test AT portu" : "Chyba AT portu",
+                                     message: result.message,
+                                     style: alertType)
+            }
+        }
+    }
+    
+    @IBAction func testPPPPort(_ sender: NSButton) {
+        guard let selectedPort = pppPortPopup.selectedItem?.title else {
+            showPortTestAlert(title: "Chyba", message: "Není vybrán žádný PPP port")
+            return
+        }
+        
+        sender.title = "Testování..."
+        sender.isEnabled = false
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            let result = Settings.shared.testPPPPort(selectedPort)
+            
+            DispatchQueue.main.async {
+                sender.title = "Test PPP"
+                sender.isEnabled = true
+                
+                let alertType: NSAlert.Style = result.success ? .informational : .warning
+                self.showPortTestAlert(title: result.success ? "Test PPP portu" : "Chyba PPP portu",
+                                     message: result.message,
+                                     style: alertType)
+            }
+        }
+    }
+    
+    private func showPortTestAlert(title: String, message: String, style: NSAlert.Style = .informational) {
+        let alert = NSAlert()
+        alert.messageText = title
+        alert.informativeText = message
+        alert.alertStyle = style
+        alert.addButton(withTitle: "OK")
+        
+        if let window = self.window {
+            alert.beginSheetModal(for: window)
+        } else {
+            alert.runModal()
         }
     }
     /*
