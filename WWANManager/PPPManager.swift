@@ -127,7 +127,7 @@ class PPPManager {
         }
         
         // Kontrola dostupných PDP kontextů
-        print("Checking available PDP contexts...")
+        /*print("Checking available PDP contexts...")
         let cgdcontTest = ModemManager.shared.sendAndRead("AT+CGDCONT=?")
         print("AT+CGDCONT=? response: \(cgdcontTest)")
         
@@ -136,7 +136,7 @@ class PPPManager {
         
         // Kontrola IPv6 podpory
         let cgcontrdpTest = ModemManager.shared.sendAndRead("AT+CGCONTRDP=?")
-        print("AT+CGCONTRDP=? response: \(cgcontrdpTest)")
+        print("AT+CGCONTRDP=? response: \(cgcontrdpTest)")*/
         
         var COPS_STR = ""
         if Settings.shared.operatorID == "0" {
@@ -170,17 +170,34 @@ class PPPManager {
             let setIPv6Context = ModemManager.shared.sendAndRead("AT+CGDCONT=2,\"IPV6\",\"\(apn)\"")
             print("Setting IPv6 context: \(setIPv6Context)")
             
+            let setIPv4v6Context = ModemManager.shared.sendAndRead("AT+CGDCONT=3,\"IPV4V6\",\"\(apn)\"")
+            print("Setting IPv4v6 context: \(setIPv6Context)")
+            
             // Zkontrolujeme nastavené kontexty
             let verifyContexts = ModemManager.shared.sendAndRead("AT+CGDCONT?")
             print("Verified contexts: \(verifyContexts)")
         }
         
         // 1. Vytvoříme chat skript
-        var script = """
+        
+        let script = """
                     ABORT "BUSY"
                     ABORT "NO CARRIER"
                     ABORT "ERROR"
                     '' ATZ
+                    \(pin != "" ? "OK AT+CPIN=\"\(pin)\"" : "#NO PIN")
+                    OK AT+COPS=\(COPS_STR)
+                    OK AT+CGDCONT=1,"\(pdpType)","\(apn)"
+                    OK ATD*99#
+                    CONNECT ''
+                    """
+        
+        /*var script = """
+                    ABORT "BUSY"
+                    ABORT "NO CARRIER"
+                    ABORT "ERROR"
+                    '' ATZ
+                    OK AT+CFUN=1
                     """
         if pin != "" {
             script += """
@@ -189,10 +206,10 @@ class PPPManager {
         }
         script += """
                 \nOK AT+COPS=\(COPS_STR)
-                OK AT+CGDCONT=1,"\(pdpType)","\(apn)"
+                OK AT+CGDCONT=1,"IP","\(apn)"
                 OK ATD*99#
                 CONNECT ''
-                """
+                """*/
         print("\nChat script:")
         print("------------------------------")
         print(script)
@@ -222,7 +239,7 @@ class PPPManager {
             let response = alert.runModal()
             if response == .alertFirstButtonReturn {
                 password = inputField.stringValue
-                Settings.shared.passwd = password // volitelně uložit pro další použití
+                //Settings.shared.passwd = password // volitelně uložit pro další použití
             } else {
                 return false
             }
