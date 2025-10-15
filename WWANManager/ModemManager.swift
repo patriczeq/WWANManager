@@ -117,6 +117,10 @@ class ModemManager {
     }
     
     var operatorName: String? = nil
+    var networkTechnology: String = "Unknown"
+    var cellId: String = ""
+    var lac: String = ""
+    var band: String = ""
 
     func updateOperatorName() {
         //open()
@@ -127,6 +131,94 @@ class ModemManager {
             operatorName = ""
         }
         //close()
+    }
+    
+    func getNetworkTechnology() -> String {
+        // Zkus různé AT příkazy pro detekci technologie
+        var response = sendAndRead("AT+COPS?")
+        
+        // Zkus AT+CREG? pro registraci a technologii
+        response = sendAndRead("AT+CREG?")
+        if response.contains("2,1") || response.contains("2,5") {
+            // Registrován na síti
+            let techResponse = sendAndRead("AT+XRAT?")
+            if techResponse.contains("7") {
+                return "LTE"
+            } else if techResponse.contains("2") {
+                return "UMTS/3G"
+            } else if techResponse.contains("0") {
+                return "GSM/2G"
+            }
+        }
+        
+        // Alternativní metoda přes AT+CEREG pro LTE
+        response = sendAndRead("AT+CEREG?")
+        if response.contains("1") || response.contains("5") {
+            return "LTE"
+        }
+        
+        // Zkus AT+CGACT? pro aktivní PDP kontext
+        response = sendAndRead("AT+CGACT?")
+        if response.contains("1,1") {
+            // Aktivní kontext, zkus zjistit technologii
+            let serviceResponse = sendAndRead("AT+CPSI?")
+            if serviceResponse.contains("LTE") {
+                return "LTE"
+            } else if serviceResponse.contains("WCDMA") {
+                return "3G/WCDMA"
+            } else if serviceResponse.contains("GSM") {
+                return "2G/GSM"
+            }
+        }
+        
+        return "Unknown"
+    }
+    
+    func getCellInfo() -> (cellId: String, lac: String, band: String) {
+        var cellId = ""
+        var lac = ""
+        var band = ""
+        
+        // Zkus získat Cell ID a LAC
+        let cregResponse = sendAndRead("AT+CREG?")
+        // Parsing pro +CREG: 2,1,"LAC","CellID"
+        if let match = cregResponse.range(of: #"\+CREG:\s*\d+,\d+,"([^"]+)","([^"]+)""#, options: .regularExpression) {
+            let components = cregResponse[match].components(separatedBy: "\"")
+            if components.count >= 4 {
+                lac = components[1]
+                cellId = components[3]
+            }
+        }
+        
+        // Zkus získat informace o pásmu
+        let bandResponse = sendAndRead("AT+CPSI?")
+        if bandResponse.contains("LTE") {
+            // Parsing pro LTE band info
+            if let bandMatch = bandResponse.range(of: #"LTE.*?(\d+)"#, options: .regularExpression) {
+                band = "LTE B" + String(bandResponse[bandMatch].components(separatedBy: CharacterSet.decimalDigits.inverted).joined())
+            }
+        } else if bandResponse.contains("WCDMA") {
+            band = "WCDMA"
+        } else if bandResponse.contains("GSM") {
+            band = "GSM"
+        }
+        
+        return (cellId, lac, band)
+    }
+    
+    func getCarrierAggregationInfo() -> String {
+        let response = sendAndRead("AT+CPSI?")
+        if response.contains("CA") {
+            return "Enabled"
+        }
+        return "Disabled"
+    }
+    
+    func getDataUsage() -> (rx: String, tx: String) {
+        // Někdy modemy podporují AT+CGDCONT? pro data usage
+        let response = sendAndRead("AT+CGDCONT?")
+        // Toto je zjednodušené - skutečné parsování závisí na modemu
+        return ("N/A", "N/A")
     }
     
     func getSignalStrength() -> (level: SignalStrengthLevel, rssi: Int)? {
@@ -146,12 +238,11 @@ class ModemManager {
 
         let level: SignalStrengthLevel
         switch rssi {
-        case 0...2: level = .none
-        case 3...10: level = .poor
-        case 11...15: level = .fair
-        case 16...25: level = .good
-        case 26...31: level = .excellent
-        default: level = .none
+            case 1...9:     level = .poor      // -111 až -93 dBm
+            case 10...14:   level = .fair      // -91 až -83 dBm
+            case 15...19:   level = .good      // -81 až -73 dBm
+            case 20...31:   level = .excellent // -71 až -51 dBm
+            default:        level = .none
         }
 
         return (level, rssi)

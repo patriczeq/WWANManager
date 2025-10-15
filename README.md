@@ -29,6 +29,18 @@ WWANManager is an alternative tool for managing WWAN (Mobile Broadband) connecti
      ```
      AT+GTUSBMODE=7
      ```
+     You can unlock the modem by issuing
+    ```
+    at@nvm:fix_cat_fcclock.fcclock_mode=0
+    ```
+    (The default mode, at least on my modem, is 2.)
+
+    This will work until the modem is next power cycled or reset. To make the change permanent, issue:
+    ```
+    at@store_nvm(fix_cat_fcclock)
+    ```
+    The modem will then power up with radio enabled in future.
+
    - The modem will reset and create three ACM interfaces on your Mac.
 
 2. **Configure and run WWANManager:**

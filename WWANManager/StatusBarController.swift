@@ -44,6 +44,17 @@ class StatusBarController: NSObject, NSMenuDelegate {
         // Add cellular icon from Assets
         let cellularImageView = NSImageView(frame: NSRect(x: 6, y: 6, width: 16, height: 16))
         cellularImageView.image = NSImage(named: "Signal4")
+        /*if self.signalLevel == .poor {
+            cellularImageView.image = NSImage(imageLiteralResourceName: "Signal1")
+        }else if self.signalLevel == .fair {
+            cellularImageView.image = NSImage(imageLiteralResourceName: "Signal2")
+        }else if self.signalLevel == .good {
+            cellularImageView.image = NSImage(imageLiteralResourceName: "Signal3")
+        }else if self.signalLevel == .excellent {
+            cellularImageView.image = NSImage(imageLiteralResourceName: "Signal4")
+        }else{
+            cellularImageView.image = NSImage(imageLiteralResourceName: "Signal0")
+        }*/
         cellularImageView.imageScaling = .scaleProportionallyUpOrDown
         iconView.addSubview(cellularImageView)
         
@@ -120,6 +131,11 @@ class StatusBarController: NSObject, NSMenuDelegate {
                 let infoItem = NSMenuItem(title: "Info", action: nil, keyEquivalent: "")
                 let infoSubmenu = NSMenu(title: "Info")
                 
+                // Network Technology (LTE, 3G, etc.)
+                let technology = ModemManager.shared.getNetworkTechnology()
+                let techMenuItem = NSMenuItem(title: "Technology: \(technology)", action: nil, keyEquivalent: "")
+                infoSubmenu.addItem(techMenuItem)
+                
                 // Signal strength
                 if let signal = ModemManager.shared.getSignalStrength() {
                     self.signalLevel = signal.level
@@ -130,6 +146,33 @@ class StatusBarController: NSObject, NSMenuDelegate {
                     signalMenuItem = NSMenuItem(title: signalLine, action: nil, keyEquivalent: "")
                     infoSubmenu.addItem(signalMenuItem!)
                 }
+                
+                // Cell Information (if available)
+                let cellInfo = ModemManager.shared.getCellInfo()
+                if !cellInfo.cellId.isEmpty {
+                    let cellMenuItem = NSMenuItem(title: "Cell ID: \(cellInfo.cellId)", action: nil, keyEquivalent: "")
+                    infoSubmenu.addItem(cellMenuItem)
+                }
+                
+                if !cellInfo.lac.isEmpty {
+                    let lacMenuItem = NSMenuItem(title: "LAC: \(cellInfo.lac)", action: nil, keyEquivalent: "")
+                    infoSubmenu.addItem(lacMenuItem)
+                }
+                
+                if !cellInfo.band.isEmpty && cellInfo.band != "Unknown" {
+                    let bandMenuItem = NSMenuItem(title: "Band: \(cellInfo.band)", action: nil, keyEquivalent: "")
+                    infoSubmenu.addItem(bandMenuItem)
+                }
+                
+                // Carrier Aggregation (for LTE)
+                if technology.contains("LTE") {
+                    let caInfo = ModemManager.shared.getCarrierAggregationInfo()
+                    let caMenuItem = NSMenuItem(title: "CA: \(caInfo)", action: nil, keyEquivalent: "")
+                    infoSubmenu.addItem(caMenuItem)
+                }
+                
+                // Separator before connection stats
+                infoSubmenu.addItem(NSMenuItem.separator())
                 
                 // Connection statistics
                 dataUsageMenuItem = NSMenuItem(title: PPPManager.shared.getFormattedDataUsage(), action: nil, keyEquivalent: "")

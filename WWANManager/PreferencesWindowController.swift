@@ -197,7 +197,44 @@ class PreferencesWindowController: NSWindowController {
 
         return results
     }
-    
+    @IBAction func fixFCCLock(_ sender: Any) {
+        // Potvrzovací dialog před provedením FCC Lock fixu
+        let alert = NSAlert()
+        alert.messageText = "FCC Lock Fix"
+        alert.informativeText = "Apply FCC lock? This will set fcclock_mode=0 and store it to NVM."
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: "Provést")
+        alert.addButton(withTitle: "Zrušit")
+        
+        let response = alert.runModal()
+        if response == .alertFirstButtonReturn {
+            var output = ModemManager.shared.sendAndRead("at@nvm:fix_cat_fcclock.fcclock_mode=0") + "\n"
+                output += ModemManager.shared.sendAndRead("at@store_nvm(fix_cat_fcclock)")
+            
+            let alertType: NSAlert.Style = .warning
+            self.showPortTestAlert(title: "FCC Lock Fix",
+                                 message: output,
+                                 style: alertType)
+        }
+    }
+    @IBAction func fixBands(_ sender: Any) {
+        // Potvrzovací dialog před provedením Band fixu
+        let alert = NSAlert()
+        alert.messageText = "Band Fix"
+        alert.informativeText = "Set band to LTE + WCDMA with LTE primary?"
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: "Provést")
+        alert.addButton(withTitle: "Zrušit")
+        
+        let response = alert.runModal()
+        if response == .alertFirstButtonReturn {
+            let output = ModemManager.shared.sendAndRead("at+xact=4,2")
+            let alertType: NSAlert.Style = .warning
+            self.showPortTestAlert(title: "Band fix",
+                                 message: output,
+                                 style: alertType)
+        }
+    }
     @IBAction func loadOperators(_ sender: Any) {
         if LoadingOperators {
             return
