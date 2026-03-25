@@ -18,6 +18,12 @@ class StatusBarController: NSObject, NSMenuDelegate {
     private var operatorMenuItem: NSMenuItem?
     private var cellularToggleSwitch: NSSwitch?
 
+    // Hardware modem state menu items
+    private var hwStateMenuItem: NSMenuItem?
+    private var hwModeMenuItem: NSMenuItem?
+    private var hwSleepWakeMenuItem: NSMenuItem?
+    private var lastHWState: ModemManager.HardwareState = .unknown
+
     override init() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         super.init()
@@ -206,6 +212,43 @@ class StatusBarController: NSObject, NSMenuDelegate {
 
         menu.addItem(NSMenuItem.separator())
 
+        // Hardware modem state section
+        let modemSectionLabel = NSMenuItem(title: "Modem", action: nil, keyEquivalent: "")
+        modemSectionLabel.attributedTitle = NSAttributedString(string: "Modem", attributes: [
+            .font: NSFont.boldSystemFont(ofSize: 13),
+            .foregroundColor: NSColor.labelColor
+        ])
+        modemSectionLabel.isEnabled = false
+        menu.addItem(modemSectionLabel)
+
+        // State row: "State: On | PCIe"
+        let hwState = ModemManager.shared.hardwareState()
+        lastHWState = hwState
+        hwStateMenuItem = NSMenuItem(title: "State: \(hwState.label)", action: nil, keyEquivalent: "")
+        hwStateMenuItem?.isEnabled = false
+        menu.addItem(hwStateMenuItem!)
+
+        hwModeMenuItem = NSMenuItem(title: "Mode: \(hwState.modeLabel)", action: nil, keyEquivalent: "")
+        hwModeMenuItem?.isEnabled = false
+        menu.addItem(hwModeMenuItem!)
+
+        // Sleep / Wake button
+        let sleepWakeTitle: String
+        let sleepWakeAction: Selector
+        switch hwState {
+        case .sleep, .unknown:
+            sleepWakeTitle = "⏻  Wake modem"
+            sleepWakeAction = #selector(modemWake)
+        default:
+            sleepWakeTitle = "⏾  Sleep modem"
+            sleepWakeAction = #selector(modemSleep)
+        }
+        hwSleepWakeMenuItem = NSMenuItem(title: sleepWakeTitle, action: sleepWakeAction, keyEquivalent: "")
+        hwSleepWakeMenuItem?.target = self
+        menu.addItem(hwSleepWakeMenuItem!)
+
+        menu.addItem(NSMenuItem.separator())
+
         let quitItem = NSMenuItem(title: NSLocalizedString("Quit", comment: "quit app"), action: #selector(terminate), keyEquivalent: "q")
         quitItem.target = self
         menu.addItem(quitItem)
@@ -251,6 +294,28 @@ class StatusBarController: NSObject, NSMenuDelegate {
 
     @objc func terminate() {
         NSApplication.shared.terminate(nil)
+    }
+
+    @objc func wakeWWAN() {
+        ModemManager.shared.wakeWWAN()
+    }
+
+    @objc func modemSleep() {
+        DispatchQueue.global().async {
+            ModemManager.shared.modemSleep()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                self.constructMenu()
+            }
+        }
+    }
+
+    @objc func modemWake() {
+        DispatchQueue.global().async {
+            ModemManager.shared.modemWake()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+                self.constructMenu()
+            }
+        }
     }
 
     private func startStatusUpdates() {
@@ -401,6 +466,21 @@ class StatusBarController: NSObject, NSMenuDelegate {
             let connectionTime = PPPManager.shared.getFormattedConnectionTime()
             let timeLabel = NSLocalizedString("Connected", comment: "connection time") + ": \(connectionTime)"
             connectionTimeItem.title = timeLabel
+        }
+
+        // Update hardware modem state (background — non-blocking)
+        DispatchQueue.global(qos: .background).async {
+            let hwState = ModemManager.shared.hardwareState()
+            DispatchQueue.main.async {
+                // If state changed, rebuild menu (button title changes)
+                if hwState.label != self.lastHWState.label {
+                    self.lastHWState = hwState
+                    self.constructMenu()
+                    return
+                }
+                self.hwStateMenuItem?.title = "State: \(hwState.label)"
+                self.hwModeMenuItem?.title  = "Mode: \(hwState.modeLabel)"
+            }
         }
     }
 }

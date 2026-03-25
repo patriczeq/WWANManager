@@ -1,0 +1,98 @@
+{
+  "" : {
+    "diagnostics" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/WWANManager-master.dia",
+    "emit-module-dependencies" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/WWANManager-master-emit-module.d",
+    "emit-module-diagnostics" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/WWANManager-master-emit-module.dia",
+    "swift-dependencies" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/WWANManager-master.swiftdeps"
+  },
+  "/Users/admin/Documents/GitHub/WWANManager/WWANManager/AboutModemWindowController.swift" : {
+    "const-values" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/AboutModemWindowController.swiftconstvalues",
+    "dependencies" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/AboutModemWindowController.d",
+    "diagnostics" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/AboutModemWindowController.dia",
+    "index-unit-output-path" : "/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/AboutModemWindowController.o",
+    "llvm-bc" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/AboutModemWindowController.bc",
+    "object" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/AboutModemWindowController.o",
+    "swift-dependencies" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/AboutModemWindowController.swiftdeps",
+    "swiftmodule" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/AboutModemWindowController~partial.swiftmodule"
+  },
+  "/Users/admin/Documents/GitHub/WWANManager/WWANManager/AppDelegate.swift" : {
+    "const-values" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/AppDelegate.swiftconstvalues",
+    "dependencies" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/AppDelegate.d",
+    "diagnostics" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/AppDelegate.dia",
+    "index-unit-output-path" : "/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/AppDelegate.o",
+    "llvm-bc" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/AppDelegate.bc",
+    "object" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/AppDelegate.o",
+    "swift-dependencies" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/AppDelegate.swiftdeps",
+    "swiftmodule" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/AppDelegate~partial.swiftmodule"
+  },
+  "/Users/admin/Documents/GitHub/WWANManager/WWANManager/ModemManager.swift" : {
+    "const-values" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/ModemManager.swiftconstvalues",
+    "dependencies" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/ModemManager.d",
+    "diagnostics" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/ModemManager.dia",
+    "index-unit-output-path" : "/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/ModemManager.o",
+    "llvm-bc" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/ModemManager.bc",
+    "object" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/ModemManager.o",
+    "swift-dependencies" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/ModemManager.swiftdeps",
+    "swiftmodule" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/ModemManager~partial.swiftmodule"
+  },
+  "/Users/admin/Documents/GitHub/WWANManager/WWANManager/PPPManager.swift" : {
+    "const-values" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/PPPManager.swiftconstvalues",
+    "dependencies" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/PPPManager.d",
+    "diagnostics" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/PPPManager.dia",
+    "index-unit-output-path" : "/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/PPPManager.o",
+    "llvm-bc" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/PPPManager.bc",
+    "object" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/PPPManager.o",
+    "swift-dependencies" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/PPPManager.swiftdeps",
+    "swiftmodule" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/PPPManager~partial.swiftmodule"
+  },
+  "/Users/admin/Documents/GitHub/WWANManager/WWANManager/PreferencesWindowController.swift" : {
+    "const-values" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/PreferencesWindowController.swiftconstvalues",
+    "dependencies" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/PreferencesWindowController.d",
+    "diagnostics" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/PreferencesWindowController.dia",
+    "index-unit-output-path" : "/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/PreferencesWindowController.o",
+    "llvm-bc" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/PreferencesWindowController.bc",
+    "object" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/PreferencesWindowController.o",
+    "swift-dependencies" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/PreferencesWindowController.swiftdeps",
+    "swiftmodule" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/PreferencesWindowController~partial.swiftmodule"
+  },
+  "/Users/admin/Documents/GitHub/WWANManager/WWANManager/Settings.swift" : {
+    "const-values" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/Settings.swiftconstvalues",
+    "dependencies" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/Settings.d",
+    "diagnostics" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/Settings.dia",
+    "index-unit-output-path" : "/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/Settings.o",
+    "llvm-bc" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/Settings.bc",
+    "object" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/Settings.o",
+    "swift-dependencies" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/Settings.swiftdeps",
+    "swiftmodule" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/Settings~partial.swiftmodule"
+  },
+  "/Users/admin/Documents/GitHub/WWANManager/WWANManager/StatusBarController.swift" : {
+    "const-values" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/StatusBarController.swiftconstvalues",
+    "dependencies" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/StatusBarController.d",
+    "diagnostics" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/StatusBarController.dia",
+    "index-unit-output-path" : "/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/StatusBarController.o",
+    "llvm-bc" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/StatusBarController.bc",
+    "object" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/StatusBarController.o",
+    "swift-dependencies" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/StatusBarController.swiftdeps",
+    "swiftmodule" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/StatusBarController~partial.swiftmodule"
+  },
+  "/Users/admin/Documents/GitHub/WWANManager/WWANManager/ViewController.swift" : {
+    "const-values" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/ViewController.swiftconstvalues",
+    "dependencies" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/ViewController.d",
+    "diagnostics" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/ViewController.dia",
+    "index-unit-output-path" : "/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/ViewController.o",
+    "llvm-bc" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/ViewController.bc",
+    "object" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/ViewController.o",
+    "swift-dependencies" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/ViewController.swiftdeps",
+    "swiftmodule" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/ViewController~partial.swiftmodule"
+  },
+  "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "const-values" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/GeneratedAssetSymbols.swiftconstvalues",
+    "dependencies" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/GeneratedAssetSymbols.d",
+    "diagnostics" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/GeneratedAssetSymbols.dia",
+    "index-unit-output-path" : "/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/GeneratedAssetSymbols.o",
+    "swift-dependencies" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/GeneratedAssetSymbols.swiftdeps",
+    "swiftmodule" : "/Users/admin/Documents/GitHub/WWANManager/build/WWANManager.build/Debug/WWANManager.build/Objects-normal/x86_64/GeneratedAssetSymbols~partial.swiftmodule"
+  }
+}

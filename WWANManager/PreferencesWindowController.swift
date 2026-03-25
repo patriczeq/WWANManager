@@ -220,21 +220,49 @@ class PreferencesWindowController: NSWindowController {
     @IBAction func fixBands(_ sender: Any) {
         // Potvrzovací dialog před provedením Band fixu
         let alert = NSAlert()
-        alert.messageText = "Band Fix"
-        alert.informativeText = "Set band to LTE + WCDMA with LTE primary?"
+        alert.messageText = "Band Fix - LTE + Všechna pásma"
+        alert.informativeText = "Nastavit LTE jako primární (AT+XACT=4,2) a přidat všechna dostupná pásma (GSM/3G/LTE) pro maximální kompatibilitu?"
         alert.alertStyle = .warning
-        alert.addButton(withTitle: "Provést")
+        alert.addButton(withTitle: "LTE + Všechna pásma")
+        alert.addButton(withTitle: "Jen LTE (původní)")
+        alert.addButton(withTitle: "Zrušit")
+        
+        let response = alert.runModal()
+        
+        if response == .alertFirstButtonReturn {
+            // Nová rozšířená konfigurace
+            let output = ModemManager.shared.setLTEPlusAllBands()
+            self.showPortTestAlert(title: "Band Fix - LTE + Všechna pásma",
+                                 message: output,
+                                 style: .informational)
+        } else if response == .alertSecondButtonReturn {
+            // Původní jednoduché nastavení
+            let output = ModemManager.shared.sendAndRead("at+xact=4,2")
+            self.showPortTestAlert(title: "Band Fix - Jen LTE",
+                                 message: output,
+                                 style: .warning)
+        }
+    }
+    
+    @IBAction func resetModem(_ sender: Any) {
+        // Potvrzovací dialog před resetem modemu
+        let alert = NSAlert()
+        alert.messageText = "Reset Modem"
+        alert.informativeText = "Opravdu chcete resetovat modem? Modem se restartuje a všechna připojení budou ukončena."
+        alert.alertStyle = .critical
+        alert.addButton(withTitle: "Resetovat")
         alert.addButton(withTitle: "Zrušit")
         
         let response = alert.runModal()
         if response == .alertFirstButtonReturn {
-            let output = ModemManager.shared.sendAndRead("at+xact=4,2")
-            let alertType: NSAlert.Style = .warning
-            self.showPortTestAlert(title: "Band fix",
-                                 message: output,
+            let output = ModemManager.shared.sendAndRead("AT@R")
+            let alertType: NSAlert.Style = .informational
+            self.showPortTestAlert(title: "Reset Modem",
+                                 message: "Příkaz AT@R odeslán: \(output)\n\nModem se restartuje...",
                                  style: alertType)
         }
     }
+    
     @IBAction func loadOperators(_ sender: Any) {
         if LoadingOperators {
             return

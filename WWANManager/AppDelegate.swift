@@ -11,6 +11,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         // Inicializace status baru
         statusBarController = StatusBarController()
+
+        // ACPI modem initialization on background thread
+        DispatchQueue.global(qos: .userInitiated).async {
+            ModemManager.shared.initializeModem()
+        }
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
