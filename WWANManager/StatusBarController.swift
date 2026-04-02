@@ -30,6 +30,22 @@ class StatusBarController: NSObject, NSMenuDelegate {
 
         // Spuštění periodické kontroly
         startStatusUpdates()
+
+        // Reaguj na vynucené odpojení způsobené ztrátou TTY (sleep/wake)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleForcedDisconnect),
+            name: .pppForcedDisconnect,
+            object: nil
+        )
+    }
+
+    @objc private func handleForcedDisconnect() {
+        print("🔴 StatusBarController: pppForcedDisconnect – rebuilding menu")
+        state = .disconnected
+        stopMenuUpdateTimer()
+        constructMenu()
+        updateStatusIcon()
     }
     
     func makeOperatorMenuItem() -> NSMenuItem {
@@ -266,6 +282,15 @@ class StatusBarController: NSObject, NSMenuDelegate {
     private func updateStatus() {
         DispatchQueue.main.async {
             let newState = PPPManager.shared.connectionState()
+
+            // Pokud byl disUpdates nastaven watchdogem a TTY je zpět, obnov AT dotazy
+            if ModemManager.shared.disUpdates {
+                let ttyBack = FileManager.default.fileExists(atPath: Settings.shared.pppPort)
+                if ttyBack {
+                    print("✅ TTY je zpět, obnovuji AT dotazy")
+                    ModemManager.shared.disUpdates = false
+                }
+            }
             
             // Check if connection state changed - if so, rebuild menu
             if self.state != newState {

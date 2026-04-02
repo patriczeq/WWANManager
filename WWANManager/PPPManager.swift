@@ -4,6 +4,10 @@ import Darwin
 import Cocoa
 import Security
 
+extension Notification.Name {
+    static let pppForcedDisconnect = Notification.Name("pppForcedDisconnect")
+}
+
 enum PPPConnectionState {
     case disconnected
     case connecting
@@ -17,6 +21,7 @@ class PPPManager {
     private var chatScriptPath: String?
     private var connectionStartTime: Date?
     private var connectionTimer: Timer?
+    private var ttyWatchdogTimer: Timer?
 
     // Statistiky připojení
     private var totalBytesReceived: UInt64 = 0
@@ -244,45 +249,27 @@ class PPPManager {
                 return false
             }
         }
-        shellScript = "#!/bin/bash\n"
-        if !password.isEmpty {
-            shellScript += "echo \"\(password)\" | sudo -S "
-        } else {
-            shellScript += "sudo "
-        }
-        shellScript += "/usr/sbin/pppd \(pppPort) \(baudrate) debug nodetach"
+        // DNS argumenty
+        var dnsArgs = ""
         if peerDNS {
-            shellScript += " usepeerdns"
+            dnsArgs = " usepeerdns"
         } else {
-            // Přidání custom DNS serverů - podle man pppd
             let primaryDNS = Settings.shared.PrimaryDNS.trimmingCharacters(in: .whitespacesAndNewlines)
             let secondaryDNS = Settings.shared.SecondaryDNS.trimmingCharacters(in: .whitespacesAndNewlines)
-            
-            if !primaryDNS.isEmpty {
-                shellScript += " ms-dns \(primaryDNS)"
-                print("Using custom primary DNS: \(primaryDNS)")
-            }
-            
-            if !secondaryDNS.isEmpty {
-                shellScript += " ms-dns \(secondaryDNS)"
-                print("Using custom secondary DNS: \(secondaryDNS)")
-            }
-            
-            // Pokud nejsou nastavené žádné DNS servery, použijeme výchozí
-            if primaryDNS.isEmpty && secondaryDNS.isEmpty {
-                shellScript += " ms-dns 8.8.8.8 ms-dns 8.8.4.4"
-                print("No custom DNS set, using Google DNS as fallback")
-            }
+            if !primaryDNS.isEmpty { dnsArgs += " ms-dns \(primaryDNS)" }
+            if !secondaryDNS.isEmpty { dnsArgs += " ms-dns \(secondaryDNS)" }
+            if primaryDNS.isEmpty && secondaryDNS.isEmpty { dnsArgs = " ms-dns 8.8.8.8 ms-dns 8.8.4.4" }
         }
-        // Přidání IP verze
-        if ipver == "IP" {
-            // IPv4 pouze - žádné další parametry nejsou potřeba (výchozí)
-        } else if ipver == "IPV6" {
-            shellScript += " ipv6 ::1,::2"
-        } else if ipver == "IPV4V6" {
-            shellScript += " ipv6 ::1,::2"
+
+        var ipArgs = ""
+        if ipver == "IPV6" || ipver == "IPV4V6" {
+            ipArgs = " ipv6 ::1,::2"
         }
-        shellScript += " connect \"/usr/sbin/chat -v -f \(scriptPath)\""
+
+        let sudoPrefix = password.isEmpty ? "sudo" : "echo '\(password)' | sudo -S"
+
+        shellScript = "#!/bin/bash\n"
+        shellScript += "\(sudoPrefix) /usr/sbin/pppd \(pppPort) \(baudrate) nodetach defaultroute\(dnsArgs)\(ipArgs) connect \"/usr/sbin/chat -v -f \(scriptPath)\"\n"
         
         print("Shell script:")
         print("------------------------------")
@@ -292,7 +279,7 @@ class PPPManager {
         try? shellScript.write(toFile: shellScriptPath, atomically: true, encoding: .utf8)
         try? FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: shellScriptPath)
 
-        // 3. Spuštění shell skriptu přímo přes Process (bez osascript)
+        // 3. Spuštění shell skriptu přes Process
         task = Process()
         task?.executableURL = URL(fileURLWithPath: "/bin/bash")
         task?.arguments = [shellScriptPath]
@@ -304,6 +291,9 @@ class PPPManager {
             try task?.run()
             print("Running pppd script directly via bash")
             
+            // Spustit TTY watchdog
+            startTTYWatchdog()
+
             // Spustit timeout monitoring
             connectionStartTime = Date()
             startConnectionMonitoring()
@@ -337,6 +327,7 @@ class PPPManager {
 
 
     func disconnect() { // resetnem modem?
+        stopTTYWatchdog()
         ModemManager.shared.open()
         ModemManager.shared.send(command: "AT+CFUN=1,1")
         ModemManager.shared.close()
@@ -451,6 +442,54 @@ class PPPManager {
         try? FileManager.default.removeItem(atPath: scriptPath)
     }
     
+    // MARK: - TTY Watchdog
+
+    /// Starts a watchdog that checks whether the modem TTY still exists.
+    /// If PPP is active (connecting or connected) and the TTY disappears
+    /// (e.g. after sleep/wake), it force-disconnects PPP and disables AT queries.
+    func startTTYWatchdog() {
+        stopTTYWatchdog()
+        ttyWatchdogTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] timer in
+            guard let self = self else { timer.invalidate(); return }
+
+            let state = self.connectionState()
+            guard state == .connected || state == .connecting else {
+                // PPP is already down — nothing to watch
+                return
+            }
+
+            let ttyExists = FileManager.default.fileExists(atPath: Settings.shared.pppPort)
+            guard !ttyExists else { return }
+
+            // TTY is gone while PPP was active → force disconnect
+            print("⚠️  TTY watchdog: port \(Settings.shared.pppPort) vanished — forcing PPP disconnect")
+
+            // Disable AT queries immediately so ModemManager stops hammering the dead fd
+            ModemManager.shared.disUpdates = true
+            ModemManager.shared.close()
+
+            // Kill the pppd process
+            self.task?.terminate()
+            self.task = nil
+
+            // Stop all internal timers
+            self.connectionTimer?.invalidate()
+            self.connectionTimer = nil
+            self.connectionStartTime = nil
+            self.stopTTYWatchdog()
+
+            // Notify UI on main thread
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: .pppForcedDisconnect, object: nil)
+            }
+        }
+    }
+
+    func stopTTYWatchdog() {
+        ttyWatchdogTimer?.invalidate()
+        ttyWatchdogTimer = nil
+    }
+
     private func startConnectionMonitoring() {
         connectionTimer?.invalidate() // Zrušit předchozí timer, pokud existuje
         
